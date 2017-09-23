@@ -1,0 +1,2 @@
+python wuliu.py
+ipython
