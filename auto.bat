@@ -1,2 +1,2 @@
-python wuliu.py
+python CompyDetail.py
 ipython

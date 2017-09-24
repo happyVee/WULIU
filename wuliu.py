@@ -29,6 +29,7 @@ class wuliu():
 		self.soup = BeautifulSoup(self.re.text, 'lxml')
 		self.findPageParams()
 		self.itemlist = []
+		self.infolist = []
 		self.pnum = 1
 		self.purl = ''
 		self.inum = 0
@@ -87,21 +88,48 @@ class wuliu():
 
 	def parseItem(self):
 		self.iurl = self.basic_url + self.itemlist[self.inum]
-		print(self.iurl)
+		print(str(self.inum) + " : " + self.iurl)
 		self.re = self.se.get(self.iurl)
 		self.soup = BeautifulSoup(self.re.text, 'lxml')
-		title = self.soup.find(class_ = "page_title").text
-		print(title)
-		company_name = title[title.find('【')+1:title.find('】')]
-		print(company_name)
-		phonenum = self.soup.find(class_ = 'linkman_msg').find_all('span')[0].text
-		print(phonenum)
-		faddress = self.soup.find(class_ = 'linkman_msg').find_all('span')[1].text
-		print(faddress)
-		
-		content = self.soup.find(class_ = "ml15").text
-		print(content)
+		info = {}
+		info['iurl'] = self.iurl
+		info['title'] = self.soup.find(class_ = "page_title").text
+		info['cname'] = info['title'][info['title'].find('【')+1:info['title'].find('】')]
+		cbigfig = self.soup.find(class_ = "left_item pl15").find(id = 'example2').img['src']
+		info['ctel'] = self.soup.find(class_ = 'linkman_msg').find_all('span')[0].text
+		info['faddr'] = self.soup.find(class_ = 'linkman_msg').find_all('span')[1].text
+		content = self.soup.find(class_ = "ml15")
+		text = ''
+		plist = content.find_all('p')
+		for p in plist:
+			text = text + p.text.strip().replace('\t','').replace('\n','') + "\n"
+		info['ctext'] = text
+		#info['content'] = content
+		info['cfig'] = [cbigfig]
+		if len(content.find_all('img')) > 0:
+			figs = content.find_all('img')
+			for fig in figs:
+				info['cfig'].append(fig['src'])
+		print(info['cname'])
+		self.infolist.append(info)
 
+	def findAllInfo(self):
+		for i in range(len(self.itemlist)):
+			self.inum = i
+			self.parseItem()
+			if (i+1)%100 == 0:
+				fname = 'info' + str(int((i+1)/100)) + '.json'
+				with open(fname,'w') as f:
+					json.dump(self.infolist,f)
+				fname = 'info' + str(int((i+1)/100)) + '.txt'
+				with open(fname,'w') as f:
+					json.dump(self.infolist,f)
+				self.infolist = []
+				print('Save file ' + fname + ' success!')
+		print("totle info : " + str(len(self.infolist)))
+		with open('info.json','w') as f:
+			json.dump(self.infolist,f)
+		return self.infolist
 
 if __name__ == '__main__':
 	params = {}
@@ -112,6 +140,7 @@ if __name__ == '__main__':
 	#wl.findAllItem()
 	#wl.saveItems()
 	wl.readItems()
+	wl.findAllInfo()
 
 '''
 	params = {}
