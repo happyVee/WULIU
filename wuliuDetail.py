@@ -174,7 +174,7 @@ def checkAddr(addrl):
 				break
 	if addr[5] == '':
 		for i in range(1,6):
-			m = re.findall(r"0\d{2}d?.?\d{7}d?",addr[i])
+			m = re.findall(r"0\d{2}\d?.?\d{7}\d?",addr[i])
 			if m:
 				addr[4] = m[0]
 				break
@@ -189,7 +189,7 @@ def checkAddr(addrl):
 		addr[4] = m[0]
 	else:
 		addr[4] = ''
-	m = re.findall(r"0\d{2}d?.?\d{7}d?",addr[5])
+	m = re.findall(r"0\d{2}\d?.?\d{7}\d?",addr[5])
 	if m:
 		addr[5] = m[0]
 	else:
@@ -248,7 +248,7 @@ def saveInfo(infolist):
 		else:
 			info['tel'] = ''
 
-		m = re.findall(r"0\d{2}d?.?\d{7}d?",info['ctel'])
+		m = re.findall(r"0\d{2}\d?.?\d{7}\d?",info['ctel'])
 		if m:
 			info['pnum'] = m[0]
 		else:
