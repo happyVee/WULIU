@@ -40,7 +40,7 @@ def findRoads(info):
 	return exlist
 
 def findCitys(title):
-	title = title[title.find('】')+1:].replace('，','').replace('。','').replace('和','、').replace('及','、')
+	title = title[title.find('】')+1:].replace('，','').replace('。','').replace('和','、').replace('及','、').replace('专线','')
 	if title.find('中转') > -1:
 		pacity = title.split('中转')[1]
 		ftaddr = title.split('中转')[0]
@@ -52,6 +52,13 @@ def findCitys(title):
 		if '' in fcity:
 			fcity.remove('')
 		tocity = ftaddr.split('直达')[1].split('、')
+		if '' in tocity:
+			tocity.remove('')
+	elif ftaddr.find('至') > -1:
+		fcity = ftaddr.split('至')[0].split('、')
+		if '' in fcity:
+			fcity.remove('')
+		tocity = ftaddr.split('至')[1].split('、')
 		if '' in tocity:
 			tocity.remove('')
 	elif ftaddr.find('往返') > -1:
@@ -174,7 +181,7 @@ def checkAddr(addrl):
 				break
 	if addr[5] == '':
 		for i in range(1,6):
-			m = re.findall(r"0\d{3}.?\d{7}d?",addr[i])
+			m = re.findall(r"0\d{2}d?.?\d{7}d?",addr[i])
 			if m:
 				addr[4] = m[0]
 				break
@@ -189,7 +196,7 @@ def checkAddr(addrl):
 		addr[4] = m[0]
 	else:
 		addr[4] = ''
-	m = re.findall(r"0\d{3}.?\d{7}d?",addr[5])
+	m = re.findall(r"0\d{2}d?.?\d{7}d?",addr[5])
 	if m:
 		addr[5] = m[0]
 	else:
@@ -215,9 +222,9 @@ def biuldLi(info,fcityi,tocityi,pacity,addrlist):
 		fnum = addrlist[fcityi][5]
 	else:
 		faddr = info['faddr']
-		fpre = ' '
-		ftel = ' '
-		fnum = info['ctel']
+		fpre = ''
+		ftel = info['tel']
+		fnum = info['pnum']
 	
 	taddr_p = taddrlist[0]
 	taddr_c = taddrlist[1]
@@ -228,10 +235,10 @@ def biuldLi(info,fcityi,tocityi,pacity,addrlist):
 		ttel = addrlist[tocityi][4]
 		tnum = addrlist[tocityi][5]
 	else:
-		taddr = ' '
-		tpre = ' '
-		ttel = ' '
-		tnum = ' '
+		taddr = ''
+		tpre = ''
+		ttel = ''
+		tnum = ''
 	info['cfig'] = info['cfig'] + [' ',' ',' ',' ']	
 	cfig = info['cfig'][0:5]
 	exlistli = [cname,rinfo,faddr_p,faddr_c,faddr_a,faddr,fpre,ftel,fnum,taddr_p,taddr_c,taddr_a,taddr,tpre,ttel,tnum,pacity,cfig[0],cfig[1],cfig[2],cfig[3],cfig[4],info['iurl']]
@@ -248,7 +255,7 @@ def saveInfo(infolist):
 		else:
 			info['tel'] = ''
 
-		m = re.findall(r"0\d{3}.?\d{7}d?",info['ctel'])
+		m = re.findall(r"0\d{2}d?.?\d{7}d?",info['ctel'])
 		if m:
 			info['pnum'] = m[0]
 		else:
@@ -320,7 +327,7 @@ if __name__ == '__main__':
 	count = 0
 	saveAColmn(count,ws,exl0,style0)
 	count = 1
-	for i in range(3,4):
+	for i in range(1,4):
 		fname = 'item2info' + str(i) + '.json'
 		#fname = 'info.json'
 		print("打开文件"+ fname)

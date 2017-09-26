@@ -174,7 +174,7 @@ def checkAddr(addrl):
 				break
 	if addr[5] == '':
 		for i in range(1,6):
-			m = re.findall(r"0\d{3}.?\d{7}d?",addr[i])
+			m = re.findall(r"0\d{2}d?.?\d{7}d?",addr[i])
 			if m:
 				addr[4] = m[0]
 				break
@@ -189,7 +189,7 @@ def checkAddr(addrl):
 		addr[4] = m[0]
 	else:
 		addr[4] = ''
-	m = re.findall(r"0\d{3}.?\d{7}d?",addr[5])
+	m = re.findall(r"0\d{2}d?.?\d{7}d?",addr[5])
 	if m:
 		addr[5] = m[0]
 	else:
@@ -215,9 +215,9 @@ def biuldLi(info,fcityi,tocityi,pacity,addrlist):
 		fnum = addrlist[fcityi][5]
 	else:
 		faddr = info['faddr']
-		fpre = ' '
-		ftel = ' '
-		fnum = info['ctel']
+		fpre = ''
+		ftel = info['tel']
+		fnum = info['pnum']
 	
 	taddr_p = taddrlist[0]
 	taddr_c = taddrlist[1]
@@ -228,10 +228,10 @@ def biuldLi(info,fcityi,tocityi,pacity,addrlist):
 		ttel = addrlist[tocityi][4]
 		tnum = addrlist[tocityi][5]
 	else:
-		taddr = ' '
-		tpre = ' '
-		ttel = ' '
-		tnum = ' '
+		taddr = ''
+		tpre = ''
+		ttel = ''
+		tnum = ''
 	info['cfig'] = info['cfig'] + [' ',' ',' ',' ']	
 	cfig = info['cfig'][0:5]
 	exlistli = [cname,rinfo,faddr_p,faddr_c,faddr_a,faddr,fpre,ftel,fnum,taddr_p,taddr_c,taddr_a,taddr,tpre,ttel,tnum,pacity,cfig[0],cfig[1],cfig[2],cfig[3],cfig[4]]
@@ -248,7 +248,7 @@ def saveInfo(infolist):
 		else:
 			info['tel'] = ''
 
-		m = re.findall(r"0\d{3}.?\d{7}d?",info['ctel'])
+		m = re.findall(r"0\d{2}d?.?\d{7}d?",info['ctel'])
 		if m:
 			info['pnum'] = m[0]
 		else:
@@ -320,7 +320,7 @@ if __name__ == '__main__':
 	count = 0
 	saveAColmn(count,ws,exl0,style0)
 	count = 1
-	for i in range(1,14):
+	for i in range(1,15):
 		fname = 'info' + str(i) + '.json'
 		#fname = 'info.json'
 		print("打开文件"+ fname)
@@ -330,7 +330,5 @@ if __name__ == '__main__':
 		saveToExcel(count,ws,exlist)
 		print("总有"+ str(len(exlist)) + " 条路线")
 		count = count + len(exlist)
-		if count > 2000:
-			break
 	print("总有"+ str(count) + " 条路线")
 	wb.save('AddrItem.xls')
