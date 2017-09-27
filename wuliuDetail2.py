@@ -47,18 +47,18 @@ def findCitys(title):
 	else:
 		pacity = ''
 		ftaddr = title
-	if ftaddr.find('直达') > -1:
-		fcity = ftaddr.split('直达')[0].split('、')
-		if '' in fcity:
-			fcity.remove('')
-		tocity = ftaddr.split('直达')[1].split('、')
-		if '' in tocity:
-			tocity.remove('')
-	elif ftaddr.find('至') > -1:
+	if ftaddr.find('至') > -1:
 		fcity = ftaddr.split('至')[0].split('、')
 		if '' in fcity:
 			fcity.remove('')
 		tocity = ftaddr.split('至')[1].split('、')
+		if '' in tocity:
+			tocity.remove('')
+	elif ftaddr.find('直达') > -1:
+		fcity = ftaddr.split('直达')[0].split('、')
+		if '' in fcity:
+			fcity.remove('')
+		tocity = ftaddr.split('直达')[1].split('、')
 		if '' in tocity:
 			tocity.remove('')
 	elif ftaddr.find('往返') > -1:
@@ -315,6 +315,7 @@ def getAreaCode(cityname):
 			return city2code[ci]
 	return False
 
+
 if __name__ == '__main__':
 	wb = xlwt.Workbook()
 	ws = wb.add_sheet('Sheet1')
@@ -327,8 +328,9 @@ if __name__ == '__main__':
 	count = 0
 	saveAColmn(count,ws,exl0,style0)
 	count = 1
-	for i in range(1,4):
-		fname = 'item2info' + str(i) + '.json'
+	for i in range(0,4):
+		fname = 'web1info' + str(i) + '.json'
+		#fname = 'web2info' + str(i) + '.json'
 		#fname = 'info.json'
 		print("打开文件"+ fname)
 		with open(fname,'r') as f:
@@ -338,4 +340,24 @@ if __name__ == '__main__':
 		print("总有"+ str(len(exlist)) + " 条路线")
 		count = count + len(exlist)
 	print("总有"+ str(count) + " 条路线")
-	wb.save('AddrItem2.xls')
+
+
+	ws2 = wb.add_sheet('Sheet2')
+	count = 0
+	saveAColmn(count,ws2,exl0,style0)
+	count = 1
+	for i in range(0,4):
+		#fname = 'web1info' + str(i) + '.json'
+		fname = 'web2info' + str(i) + '.json'
+		#fname = 'info.json'
+		print("打开文件"+ fname)
+		with open(fname,'r') as f:
+			infolist = json.load(f)
+		exlist = saveInfo(infolist)
+		saveToExcel(count,ws,exlist)
+		print("总有"+ str(len(exlist)) + " 条路线")
+		count = count + len(exlist)
+	print("总有"+ str(count) + " 条路线")
+
+
+	wb.save('AddrItem0.xls')

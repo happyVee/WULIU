@@ -38,11 +38,14 @@ class wuliu():
 
 
 	def findPageParams(self):
-		self.pagation = self.soup.find(class_ = 'down_pagination')
-		fanilpage = self.pagation['href']
-		print(fanilpage)
-		index = fanilpage.find('=')
-		self.page_num = int(fanilpage[index+1:])
+		try:
+			self.pagation = self.soup.find(class_ = 'down_pagination')
+			fanilpage = self.pagation['href']
+			print(fanilpage)
+			index = fanilpage.find('=')
+			self.page_num = int(fanilpage[index+1:])
+		except:
+			self.page_num = 1
 
 	def parsePage(self,purl):
 		print(purl)
@@ -105,25 +108,48 @@ class wuliu():
 			print('error')
 
 	def findAllInfo(self):
-		for i in range(854,len(self.itemlist)):
+		filelong = 200
+		file_be = 'web2info'
+		for i in range(len(self.itemlist)):
 			self.inum = i
 			self.parseItem()
+			if (i+1)%filelong == 0:
+				fname = file_be + str(int((i+1)/filelong)) + '.json'
+				with open(fname,'w') as f:
+					json.dump(self.infolist,f)
+				self.infolist = []
+				print('Save file ' + fname + ' success!')
 		print("totle info : " + str(len(self.infolist)))
-		with open('item2info3.json','w') as f:
+		with open(file_be + '0.josn','w') as f:
 			json.dump(self.infolist,f)
 		return self.infolist
 
+def getItemFile():
+	with open('hotcity2.json','r') as f:
+		hostlist = json.load(f)
+	item_list =[]
+	for host in hostlist:
+		params = {}
+		params['host'] = host.replace('http://','').split('/')[-1] + '.chawuliu.com'
+		params['basic_url'] = 'http://' + params['host'] + '/'
+		params['index_url'] = host+'?page=1'
+		wl = wuliu(params)
+		wl.findPageParams()
+		wl.findAllItem()
+		item_list = item_list + wl.itemlist
+	print('gongyou:'+str(len(item_list)))
+	with open('item2.json','w') as f:
+		hostlist = json.dump(item_list,f)
+
 if __name__ == '__main__':
+	getItemFile()
 	params = {}
 	params['host'] = 'www.chawuliu.com'
 	params['basic_url'] = 'http://www.chawuliu.com/'
 	params['index_url'] = 'http://www.chawuliu.com/?page=1'
 	wl = wuliu(params)
-	wl.findPageParams()
-	#wl.findAllItem()
-	#wl.saveItems()
 	wl.readItems()
-	wl.findAllInfo()
+	#wl.findAllInfo()
 
 '''
 	params = {}

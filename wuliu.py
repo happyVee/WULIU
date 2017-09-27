@@ -35,15 +35,18 @@ class wuliu():
 		self.inum = 0
 		self.iurl = ''
 		self.page_flag = False
+		self.page_be = '?page='
+		self.page_af = '&ty=130&searchName=&sort=0&quyu=0&order=&com=0'
 
 
 	def findPageParams(self):
-		self.pagation = self.soup.find(id = 'pagation')
-		fanilpage = self.pagation.find(title = '尾页')['href']
-		index = fanilpage.find('&')
-		self.page_be = fanilpage[0:6]
-		self.page_af = fanilpage[index:]
-		self.page_num = int(fanilpage[6:index])
+		try:
+			self.pagation = self.soup.find(id = 'pagation')
+			fanilpage = self.pagation.find(title = '尾页')['href']
+			index = fanilpage.find('&')
+			self.page_num = int(fanilpage[6:index])
+		except:
+			self.page_num = 1
 
 	def findPageUrl(self,pnum=0):
 		if pnum == 0:
@@ -77,13 +80,11 @@ class wuliu():
 		print('Totle items: ' + str(len(self.itemlist)))
 
 	def saveItems(self):
-		with open('item.txt','w') as f:
-			json.dump(self.itemlist,f)
 		with open('item.json','w') as f:
 			json.dump(self.itemlist,f)
 
 	def readItems(self):
-		with open('item.txt','r') as f:
+		with open('item1.json','r') as f:
 			self.itemlist = json.load(f)
 
 	def parseItem(self):
@@ -114,33 +115,47 @@ class wuliu():
 		self.infolist.append(info)
 
 	def findAllInfo(self):
+		filelong = 200
+		file_be = 'web1info'
 		for i in range(len(self.itemlist)):
 			self.inum = i
 			self.parseItem()
-			if (i+1)%100 == 0:
-				fname = 'info' + str(int((i+1)/100)) + '.json'
-				with open(fname,'w') as f:
-					json.dump(self.infolist,f)
-				fname = 'info' + str(int((i+1)/100)) + '.txt'
+			if (i+1)%filelong == 0:
+				fname = file_be + str(int((i+1)/filelong)) + '.json'
 				with open(fname,'w') as f:
 					json.dump(self.infolist,f)
 				self.infolist = []
 				print('Save file ' + fname + ' success!')
 		print("totle info : " + str(len(self.infolist)))
-		with open('info.json','w') as f:
+		with open(file_be + '0.josn','w') as f:
 			json.dump(self.infolist,f)
 		return self.infolist
 
+def getItemFile():
+	with open('hotcity.json','r') as f:
+		hostlist = json.load(f)
+	item_list =[]
+	for host in hostlist:
+		params = {}
+		params['host'] = host.replace('http://','').replace('/','')
+		params['basic_url'] = host
+		params['index_url'] = host+'index.asp?ty=130'
+		wl = wuliu(params)
+		wl.findAllItem()
+		item_list = item_list + wl.itemlist
+	print('gongyou:'+str(len(item_list)))
+	with open('item1.json','w') as f:
+		hostlist = json.dump(item_list,f)
+
 if __name__ == '__main__':
+	getItemFile()
 	params = {}
 	params['host'] = 'www.wbtrans.com'
 	params['basic_url'] = 'http://www.wbtrans.com/'
 	params['index_url'] = 'http://www.wbtrans.com/index.asp?ty=130'
 	wl = wuliu(params)
-	#wl.findAllItem()
-	#wl.saveItems()
 	wl.readItems()
-	wl.findAllInfo()
+	#wl.findAllInfo()
 
 '''
 	params = {}
