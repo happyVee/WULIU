@@ -40,14 +40,21 @@ def findRoads(info):
 	return exlist
 
 def findCitys(title):
-	title = title[title.find('】')+1:].replace('，','').replace('。','').replace('和','、').replace('及','、')
+	title = title[title.find('】')+1:].replace('，','').replace('。','').replace('和','、').replace('及','、').replace('专线','')
 	if title.find('中转') > -1:
 		pacity = title.split('中转')[1]
 		ftaddr = title.split('中转')[0]
 	else:
 		pacity = ''
 		ftaddr = title
-	if ftaddr.find('直达') > -1:
+	if ftaddr.find('至') > -1:
+		fcity = ftaddr.split('至')[0].split('、')
+		if '' in fcity:
+			fcity.remove('')
+		tocity = ftaddr.split('至')[1].split('、')
+		if '' in tocity:
+			tocity.remove('')
+	elif ftaddr.find('直达') > -1:
 		fcity = ftaddr.split('直达')[0].split('、')
 		if '' in fcity:
 			fcity.remove('')
@@ -232,9 +239,12 @@ def biuldLi(info,fcityi,tocityi,pacity,addrlist):
 		tpre = ''
 		ttel = ''
 		tnum = ''
-	info['cfig'] = info['cfig'] + [' ',' ',' ',' ']	
+	info['cfig'] = info['cfig'] + ['','','','']	
 	cfig = info['cfig'][0:5]
-	exlistli = [cname,rinfo,faddr_p,faddr_c,faddr_a,faddr,fpre,ftel,fnum,taddr_p,taddr_c,taddr_a,taddr,tpre,ttel,tnum,pacity,cfig[0],cfig[1],cfig[2],cfig[3],cfig[4]]
+	for cfinum in range(5):
+		if cfig[cfinum] and not cfig[cfinum].startswith('http'):
+			cfig[cfinum] = 'http://www.chawuliu.com/' + cfig[cfinum]
+	exlistli = [cname,rinfo,faddr_p,faddr_c,faddr_a,faddr,fpre,ftel,fnum,taddr_p,taddr_c,taddr_a,taddr,tpre,ttel,tnum,pacity,cfig[0],cfig[1],cfig[2],cfig[3],cfig[4],info['iurl']]
 	return exlistli
 
 def saveInfo(infolist):
@@ -308,6 +318,7 @@ def getAreaCode(cityname):
 			return city2code[ci]
 	return False
 
+
 if __name__ == '__main__':
 	wb = xlwt.Workbook()
 	ws = wb.add_sheet('Sheet1')
@@ -315,13 +326,14 @@ if __name__ == '__main__':
 		city2code= json.load(f)
 	with open('code2city.json','r',encoding = 'utf=8') as f:
 		code2city = json.load(f)
-	exl0 = ['物流公司名称','线路信息','省','市','县/区','详细地址','联系人','手机号码','网点电话','省','市','县/区','详细地址','联系人','手机号码','网点电话','中转区域','图片1','图片2','图片3','图片4','图片5']
+	exl0 = ['物流公司名称','线路信息','省','市','县/区','详细地址','联系人','手机号码','网点电话','省','市','县/区','详细地址','联系人','手机号码','网点电话','中转区域','图片1','图片2','图片3','图片4','图片5','链接']
 	style0 = xlwt.easyxf('font: name Times New Roman, color-index red, bold on')
 	count = 0
 	saveAColmn(count,ws,exl0,style0)
 	count = 1
-	for i in range(1,15):
-		fname = 'info' + str(i) + '.json'
+	for i in range(1,42):
+		fname = 'web1info' + str(i) + '.json'
+		#fname = 'web2info' + str(i) + '.json'
 		#fname = 'info.json'
 		print("打开文件"+ fname)
 		with open(fname,'r') as f:
@@ -331,4 +343,23 @@ if __name__ == '__main__':
 		print("总有"+ str(len(exlist)) + " 条路线")
 		count = count + len(exlist)
 	print("总有"+ str(count) + " 条路线")
-	wb.save('AddrItem.xls')
+	wb.save('AddrItem1.xls')
+
+'''
+	ws2 = wb.add_sheet('Sheet2')
+	count = 0
+	saveAColmn(count,ws2,exl0,style0)
+	count = 1
+	for i in range(0,4):
+		#fname = 'web1info' + str(i) + '.json'
+		fname = 'web2info' + str(i) + '.json'
+		#fname = 'info.json'
+		print("打开文件"+ fname)
+		with open(fname,'r') as f:
+			infolist = json.load(f)
+		exlist = saveInfo(infolist)
+		saveToExcel(count,ws,exlist)
+		print("总有"+ str(len(exlist)) + " 条路线")
+		count = count + len(exlist)
+	print("总有"+ str(count) + " 条路线")
+'''

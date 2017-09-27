@@ -7,6 +7,7 @@ from urllib import parse as urlparse
 from lxml import html
 from bs4 import BeautifulSoup
 import json
+import time
 
 class wuliu():
 	def __init__(self,params):
@@ -88,36 +89,43 @@ class wuliu():
 			self.itemlist = json.load(f)
 
 	def parseItem(self):
-		self.iurl = self.basic_url + self.itemlist[self.inum]
-		print(str(self.inum) + " : " + self.iurl)
-		self.re = self.se.get(self.iurl)
-		self.soup = BeautifulSoup(self.re.text, 'lxml')
-		info = {}
-		info['iurl'] = self.iurl
-		info['title'] = self.soup.find(class_ = "page_title").text
-		info['cname'] = info['title'][info['title'].find('【')+1:info['title'].find('】')]
-		cbigfig = self.soup.find(class_ = "left_item pl15").find(id = 'example2').img['src']
-		info['ctel'] = self.soup.find(class_ = 'linkman_msg').find_all('span')[0].text
-		info['faddr'] = self.soup.find(class_ = 'linkman_msg').find_all('span')[1].text
-		content = self.soup.find(class_ = "ml15")
-		text = ''
-		plist = content.find_all('p')
-		for p in plist:
-			text = text + p.text.strip().replace('\t','').replace('\n','') + "\n"
-		info['ctext'] = text
-		#info['content'] = content
-		info['cfig'] = [cbigfig]
-		if len(content.find_all('img')) > 0:
-			figs = content.find_all('img')
-			for fig in figs:
-				info['cfig'].append(fig['src'])
-		print(info['cname'])
-		self.infolist.append(info)
+		try:
+			self.iurl = self.basic_url + self.itemlist[self.inum]
+			print(str(self.inum) + " : " + self.iurl)
+			self.re = self.se.get(self.iurl)
+			self.soup = BeautifulSoup(self.re.text, 'lxml')
+			info = {}
+			info['iurl'] = self.iurl
+			info['title'] = self.soup.find(class_ = "page_title").text
+			info['cname'] = info['title'][info['title'].find('【')+1:info['title'].find('】')]
+			cbigfig = self.soup.find(class_ = "left_item pl15").find(id = 'example2').img['src']
+			info['ctel'] = self.soup.find(class_ = 'linkman_msg').find_all('span')[0].text
+			info['faddr'] = self.soup.find(class_ = 'linkman_msg').find_all('span')[1].text
+			content = self.soup.find(class_ = "ml15")
+			text = ''
+			plist = content.find_all('p')
+			for p in plist:
+				text = text + p.text.strip().replace('\t','').replace('\n','') + "\n"
+			info['ctext'] = text
+			#info['content'] = content
+			info['cfig'] = [cbigfig]
+			if len(content.find_all('img')) > 0:
+				figs = content.find_all('img')
+				for fig in figs:
+					info['cfig'].append(fig['src'])
+			#print(info['cname'])
+			self.infolist.append(info)
+		except:
+			print('error')
+			time.sleep(20)
+			self.se = requests.Session()
+			self.se.headers = self._headers
+			self.se.get(self.index_url)
 
 	def findAllInfo(self):
 		filelong = 200
 		file_be = 'web1info'
-		for i in range(len(self.itemlist)):
+		for i in range(5800,len(self.itemlist)):
 			self.inum = i
 			self.parseItem()
 			if (i+1)%filelong == 0:
@@ -126,8 +134,9 @@ class wuliu():
 					json.dump(self.infolist,f)
 				self.infolist = []
 				print('Save file ' + fname + ' success!')
+				time.sleep(10)
 		print("totle info : " + str(len(self.infolist)))
-		with open(file_be + '0.josn','w') as f:
+		with open(file_be + '0.json','w') as f:
 			json.dump(self.infolist,f)
 		return self.infolist
 
@@ -148,14 +157,14 @@ def getItemFile():
 		hostlist = json.dump(item_list,f)
 
 if __name__ == '__main__':
-	getItemFile()
+	#getItemFile()
 	params = {}
 	params['host'] = 'www.wbtrans.com'
 	params['basic_url'] = 'http://www.wbtrans.com/'
 	params['index_url'] = 'http://www.wbtrans.com/index.asp?ty=130'
 	wl = wuliu(params)
 	wl.readItems()
-	#wl.findAllInfo()
+	wl.findAllInfo()
 
 '''
 	params = {}

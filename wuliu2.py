@@ -7,6 +7,7 @@ from urllib import parse as urlparse
 from lxml import html
 from bs4 import BeautifulSoup
 import json
+import time
 
 class wuliu():
 	def __init__(self,params):
@@ -106,11 +107,15 @@ class wuliu():
 			self.infolist.append(info)
 		except:
 			print('error')
+			time.sleep(20)
+			self.se = requests.Session()
+			self.se.headers = self._headers
+			self.se.get(self.index_url)
 
 	def findAllInfo(self):
 		filelong = 200
 		file_be = 'web2info'
-		for i in range(len(self.itemlist)):
+		for i in range(1600,len(self.itemlist)):
 			self.inum = i
 			self.parseItem()
 			if (i+1)%filelong == 0:
@@ -119,6 +124,7 @@ class wuliu():
 					json.dump(self.infolist,f)
 				self.infolist = []
 				print('Save file ' + fname + ' success!')
+				time.sleep(10)
 		print("totle info : " + str(len(self.infolist)))
 		with open(file_be + '0.josn','w') as f:
 			json.dump(self.infolist,f)
@@ -142,14 +148,14 @@ def getItemFile():
 		hostlist = json.dump(item_list,f)
 
 if __name__ == '__main__':
-	getItemFile()
+	#getItemFile()
 	params = {}
 	params['host'] = 'www.chawuliu.com'
 	params['basic_url'] = 'http://www.chawuliu.com/'
 	params['index_url'] = 'http://www.chawuliu.com/?page=1'
 	wl = wuliu(params)
 	wl.readItems()
-	#wl.findAllInfo()
+	wl.findAllInfo()
 
 '''
 	params = {}
